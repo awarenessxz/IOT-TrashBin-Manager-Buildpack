@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
+
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+ENV_DIR=${3:-}
+
+# run setup.sql 
+if [ -f $ENV_DIR/SQL_SETUP_SCRIPT ]; then
+	DATABASE_URL=`cat $ENV_DIR/DATABASE_URL`
+	SQL_SETUP_SCRIPT=`cat $ENV_DIR/SQL_SETUP_SCRIPT`
+	echo "Running setup script"
+	psql -c "\i $BUILD_DIR/$SQL_SETUP_SCRIPT" $DATABASE_URL --quiet
+	if [ $? -eq 0 ]; then
+	    exit 0
+	else
+	    echo "build fail. psql fail to run"
+	    exit 1
+	fi
+fi
+
+echo "SQL_SETUP_SCRIPT is undefined"
+exit 1
